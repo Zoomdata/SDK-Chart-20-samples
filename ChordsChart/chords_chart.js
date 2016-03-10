@@ -3,8 +3,9 @@
 /** README
  * 
  * The chords chart accepts a data source that:
- *  - is a square
+ *  - is square
  *  - first column lists attribute name and items (ex. "Origin")
+ *  - first row of each other column is the name of the recipient/destination 
  *  - each other column lists the relationship of each item to another item
  *      (ex. as number of migrants to a destination)
  *  - items of attribute (first column) must match the names of metrics in
@@ -20,7 +21,19 @@
  * All capitals are reduced to lower case for computation (but not presentation)
  * purposes, so your data cannot have both "Maryland" and "maryland" as attributes.
  * 
- * Reading the chart:
+ * The visualization must be configured with two variables in the Zoomdata
+ * Chart Studio environment:
+ *  - "Group By", type = group, group type = attribute
+ *  - "Metrics", type = multi-metric, metric type = general, color attribute selected
+ * After configuring the variables, you must configure each data source that
+ * will use the chart to do so:
+ * 1. Navigate to Settings > Sources > [Your Source] > Charts
+ * 2. Select Custom > [The Chords Chart]
+ * 3. Select all relevant variables
+ * 4. Select Save.
+ * 
+ * 
+ * Interpret the chart:
  *  Each item is connected to all the others by chords. Each chord has
  *  two ends: one end touches each of the two items that it connects. The width
  *  of the base indicates the strength or volume of that item's relationship to
