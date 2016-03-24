@@ -53,10 +53,6 @@
     
 
 var groupAccessors = controller['dataAccessors']['Group By'];
-console.log("groupAccessors.getColorScale: ", groupAccessors.getColorScale() );
-console.log("groupAccessors.getColorScaleType: ", groupAccessors.getColorScaleType() );
-
-//var colors = ["#049DBF", "#67BF4E", "#F2AD18", "#F26849"];
 
 controller.createAxisLabel({
     picks: 'Group By',
@@ -65,6 +61,11 @@ controller.createAxisLabel({
     popoverTitle: 'Group'
 });
 
+// controller.element is populated by Zoomdata with
+// whichever HTML element will hold the visualization.
+// In the client studio, this value is '#widgetBody'.
+// In embedded contexts, this value is populated on the value
+// provided to visualize()'s {element: } key
 var widgetContent = d3.select(controller.element);
 
 var width = $(controller.element).width();
@@ -79,6 +80,8 @@ var fill = d3.scale.ordinal()
     .domain(d3.range(4))
     .range(colors);
 
+// Size and location of the SVG element that will hold the
+// chord diagram within controller.element
 var svg = widgetContent.append("svg")
     .attr("width", width)
     .attr("height", height)
@@ -101,6 +104,7 @@ function drawDiagram() {
 
     /*---------------------------------------*/
     /*-------- Load datas into matrix -------*/
+    /*-------- expected by D3 ---------------*/
     /*---------------------------------------*/
     
     var tableOfData = [];
@@ -128,7 +132,6 @@ function drawDiagram() {
     
     // now use list of items to gather metric values from datas and
     // produce a matrix
-    
     datas.forEach( function(origin) {
         var stateRow = [];
         
@@ -163,8 +166,6 @@ function drawDiagram() {
     .domain(d3.range(4))
     .range(colors);
     
-    console.log( "colors: ", colors );
-        
     svg.append("g").selectAll("path")
         .data(chord.groups)
         .enter().append("path")
@@ -174,6 +175,7 @@ function drawDiagram() {
         .on("mouseover", fade(.05))
         .on("mouseout", fade(1));
 
+    // determine position of labels
     var ticks = svg.append("g").selectAll("g")
         .data(chord.groups)
         .enter().append("g").selectAll("g")
@@ -185,6 +187,7 @@ function drawDiagram() {
                     + "translate(" + outerRadius + ",0)";
         });
     
+    // define label text
     ticks.append("text")
         .attr("x", 8)
         .attr("dy", ".35em")
@@ -192,6 +195,7 @@ function drawDiagram() {
     
             //return 100; });
     
+    // create chords
     svg.append("g")
         .attr("class", "chord")
         .selectAll("path")
@@ -250,7 +254,7 @@ controller.resize = function(w, h, size) {
     //set global width and height
     width = w;
     height = h;
-
+    
     //recalculate new radii    
     innerRadius = Math.min(width, height) * .31,
     outerRadius = innerRadius * 1.1;
