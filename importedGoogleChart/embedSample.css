@@ -1,0 +1,17 @@
+/*
+ * Table styles
+ */
+@import url(https://fonts.googleapis.com/css?family=Source+Sans+Pro:200,300,400,600,700,900,200italic,300italic,400italic,600italic,700italic,900italic);
+
+body {
+   font-family: "Source Sans Pro";
+   width: 80%;
+   margin-left: auto;
+   margin-right: auto;
+   font-size: 16pt;
+}
+
+.sampleversion {
+	color: #AA0000;
+  font-size: 1.5em;
+}
