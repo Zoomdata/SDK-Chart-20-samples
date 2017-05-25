@@ -1,4 +1,32 @@
+/*
+ * Copyright (C) Zoomdata, Inc. 2012-2017. All rights reserved.
+ */
 
+/*
+ * Sample Imported Chart
+ *
+ * This sample builds on chartImportedFromGoogle-2-of-1.
+ *
+ * The sample:
+ *    1. Shows adding an additional selectable label to pick an
+ *       additional chart variable, in this casem Metric.
+ *    2. Shows using data accessors to identify group and metric
+ *       currently selected.
+ *    3. Shows using currently selected group and metric to populate
+ *       data, whereas sample chartImportedFromGoogle-2-of-2 doesn't
+ *       allow the user to select a metric variable.
+ *    4. Use of data accessors to identify colors selected in the app or
+ *       by API and use them for the chart
+ * 
+ * Dependencies: loader.js, available from Google and linked in original sample
+ * Source of imported chart: https://google-developers.appspot.com/chart/interactive/docs/gallery/piechart
+ * 
+ */
+
+// Works with Grouped variables (remove if using UnGrouped)
+// Provides the metadata that Zoomdata app needs to render selectable
+// labels. These labels appear only in the Zoomdata application. They
+// do not appear if the chart is embedded in a custom application.
 
 controller.createAxisLabel({
     picks: 'Group By', // Variable Name
@@ -7,8 +35,6 @@ controller.createAxisLabel({
     popoverTitle: 'Group'
 });
 
-// Add an additional picker label so that users can pick a metric
-// rather than using a hardcoded one.
 controller.createAxisLabel({
     picks: 'Metric', // Variable Name
     orientation: 'horizontal',
@@ -16,7 +42,15 @@ controller.createAxisLabel({
     popoverTitle: 'Metric'
 });
 
+// controller.element stores the element where Zoomdata will
+// render the chart. controller.element should be treated as read-only.
+
 console.log(controller.element);
+
+
+// Google Charts loads specific chart packages at runtime.
+// This approach causes an issue of asynchronicity which we solve below
+// and in the controller.update() method.
 
 var googleLoaded = false;
 google.charts.load('current', {'packages':['corechart']});
@@ -26,71 +60,92 @@ google.charts.setOnLoadCallback( function() {
 });
 
 
-// global variables to store last data and progress values
-// between update() calls.
+// Global variables to store current data and progress so that
+// we can access them in the event of a controller.resize() call.
+
 var resizeData, resizeProgress;
+
+// Zoomdata calls this method whenever new data becomes available.
+// We will use it to transform our Zoomdata-provided data into the
+// format wanted by the Google charts and then to call the Google
+// chart rendering methods.
 
 controller.update = function(data, progress) {
 
-    if (!googleLoaded) {return;}
+    // Stop update if Google chart package hasn't finished loading yet.
+    if (!googleLoaded) return;
     
+    // Store current data and progress in the event of a resize
     resizeData = data;
     resizeProgress = progress;
 
+    // Reshape our data to fit the format that Google charts wants:
+    // two columns - one for the pie slices and one for the slice data
     var dataForGoogleChart = [];
     dataForGoogleChart.push(["wedge","quantity"]);
+
+    // Identify the chart variable used for grouping
+    var groupsList = controller.dataAccessors.getDimensionAccessors();
+    var theGroup;
+    for (var group in groupsList[0]) {
+        theGroup = group;
+    }
+    var groupAccessor = controller.dataAccessors[theGroup];
     
-    var colorList = [];
+    // Identify the chart variable used for metric value
+    var metricsList = controller.dataAccessors.getMetricAccessors();
+    var theMetric;
+    for (var metric in metricsList[0]) {
+        theMetric = metric;
+    }
+    var metricAccessor = controller.dataAccessors[theMetric];
     
+    // Build from our data the table that the Google chart library expects 
     data.forEach( function(datum) {
-
-        // get the data packet's dimension accessor
-        // dimensions is the new name for groups in the Zoomdata JS client library
-        // but don't worry - 'groups' still works
-        var dimensionAccessors = controller.dataAccessors.getDimensionAccessors()[0];
-        var selectedDimension = dimensionAccessors[ Object.keys(dimensionAccessors)[0] ];
-
-        // get the data packet's metric accessor
-        var metricAccessors = controller.dataAccessors.getMetricAccessors()[0];
-        var selectedMetric = metricAccessors[ Object.keys(metricAccessors)[0]];
-
-        // in each row:
-        //    first item is always the pie wedge
-        //    second item is the metric's value
-        var row = [selectedDimension.raw(datum), selectedMetric.raw(datum)];
-        // handle nulls in the data because Google Charts doesn't like that
-        if (row[0] === null) {row[0]="Null";}
-        if (row[1] === null) {row[1]="Null";}
-
-        // at the row of curated data to the data table
-        // that we will give to Google
+        var metricName;
+        var groupName = groupAccessor.raw(datum);
+        
+        // Google charts don't convert null value to string, so we must        
+        var row = [
+                    groupName !== null ? groupName : "null / unknown",
+                    metricAccessor.raw(datum)
+        ];
         dataForGoogleChart.push(row);
-
-        // Google's chart wants the colors passed as a single list
-        // so we'll build that as we build the data table
-        colorList.push(selectedDimension.color(datum));
     });
     
+    // Feed our reshaped data to Google's transform to get Google's
+    // internal format
     var googledData = google.visualization.arrayToDataTable(dataForGoogleChart);
-    
-    // rather than hard coding colors, we'll use the list of colors
-    // that we built while building the table of values.
-    // Zoomdata picks the colors based on the color settings selected.
-    // Colors are selected via UI in the app or via API in an embedded setting.
+        
+    // Identify our currently selected color accessor; we happen to know
+    // that it's the group accessor, but that is not necessarily true.
+    var theDataAccessors = controller.dataAccessors;
+    var theColorAccessor;
+    for (var accessor in theDataAccessors) {
+        if (controller.dataAccessors[accessor].isColor) {
+            theColorAccessor = controller.dataAccessors[accessor];
+        }
+    }
+
+    // Set our Google chart formatting options
     var options = {
-        colors: colorList,
+        // use the color set selected by the user
+        colors: theColorAccessor.getColorRange(),
         pieSliceTextStyle: {
             color: 'black',
         }
     };    
-    
+
+    // Create the chart    
     var theGoogleChart = new google.visualization.PieChart(controller.element);
 
+    // Render the chart
     theGoogleChart.draw(googledData, options);
 };
 
+// Called when the widget is resized
 controller.resize = function(width, height, size) {
-    // Called when the widget is resized
     
+    // use the global variables to reload the same existing data
     controller.update(resizeData, resizeProgress);
 };
