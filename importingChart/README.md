@@ -5,19 +5,21 @@ This directory contains a set of matched JS files and Zoomdata Chart Export (.ZI
 ## What's In The Box?
 
 ### chartImportedFromGoogle-pt-1-of-2.js
-The sample demonstrates the following:
-* XYZ
-matched with chartimportedfromgoogle_pt_1_of_2.zip which can
-be imported into Zoomdata v2.5
+The sample demonstrates:
+* basic integration of a chart for use in Zoomdata
 
+### chartImportedFromGoogle-pt-2-of-2.js
+The sample demonstrates:
+* use of dataAccessors to allow Zoomdata users to adjust chart variables including group, metric, and color selections.
 
-## Running the Samples
+### What did we add to part 2?
+You can compare parts 1 and 2 here: https://www.diffchecker.com/bTd80JTU
 
-1. Make sure you have a simple server like http-server available at NPM.
-
-1. Clone this repository.
-
-
+## Running the samples
+1. Log into Zoomdata as an admin and go to Chart Studio.
+2. Import the ZIP file for the chart that you want to examine.
+3. Go to source configuration, select a source, and configure default source settings for the imported chart.
+4. Return to Chart Studio and open the chart that you imported.
 
 ## Credits and Resources
 
