@@ -1,5 +1,5 @@
 /*
- * Copyright (C) Zoomdata, Inc. 2012-2017. All rights reserved.
+ * Copyright (C) Zoomdata, Inc. 2012-2018. All rights reserved.
  */
 
 /*

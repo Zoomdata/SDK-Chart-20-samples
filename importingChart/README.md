@@ -20,7 +20,3 @@ You can compare parts 1 and 2 here: https://www.diffchecker.com/bTd80JTU
 2. Import the ZIP file for the chart that you want to examine.
 3. Go to source configuration, select a source, and configure default source settings for the imported chart.
 4. Return to Chart Studio and open the chart that you imported.
-
-## Credits and Resources
-
-Contributed by Zoomdata employee Ryan H.
