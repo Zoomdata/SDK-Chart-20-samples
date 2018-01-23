@@ -1,2 +1,3 @@
 # SDK v2.0 Visualization Framework samples
-This repository houses samples and example code for download and use with Zoomdata Chart Studio.
+This repository houses samples for creating custom visualizations in Zoomdata.  For
+more information see the [Zoomdata Developer Zone](https://www.zoomdata.com/developers/visualization-framework)
